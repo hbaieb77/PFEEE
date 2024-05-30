@@ -1,0 +1,23 @@
+
+Mai S2 , S3  Arrive chez BPI ( accès a la platform )  Réalisation du spec fonctionnel et technique  
+
+Mai S3  Exploration des données  
+
+Mai S4 , S5  Développement et recette de la dataset  
+
+Juin S1  Développement du rapport Qlik 
+
+Juin S2 Développement d’un model IA  
+
+Juin S3 Recette du reporting et model IA   
+
+Juin S4 Développement du pipeline CI/CD  
+
+Juillet S1 Optimisation et amélioration continue  
+
+Juillet S2 Reproduction du dataset sur Dataiku  
+
+Juillet S3  La mise en prod  
+
+Juillet S4  Maintenance et support  
+
