@@ -1,0 +1,177 @@
+Tickets :
+LOAD
+    TICKET_ID,
+    TICKET_TYPE,
+    Date(Floor(CREATION_DATE)) as CREATION_DATE,
+    Date(Floor(END_DATE)) as END_DATE,
+    //DESC_COURTE,
+    MAX_RESOLUTION_DATE,
+    DUREE_PEC, 
+    BENEF_ID,
+    INTERV_NAME,
+    Group_ID,
+    "Resolution Time (Minutes)",
+    "Delay resolution (Days)"
+FROM [lib://DataFiles/ticket.csv]
+(txt, utf8, embedded labels, delimiter is ',', msq)
+WHERE TICKET_TYPE = 'Incident';
+
+
+
+Groups : 
+LOAD
+    Group_ID,
+    Group_Name,
+    Responsable,
+    Niveau,
+    "Type" as Group_type , 
+    Train
+FROM [lib://DataFiles/groups.csv]
+(txt, utf8, embedded labels, delimiter is ',', msq);
+
+
+
+
+
+Actions : 
+LOAD
+    ACTION_ID,
+    ACTION_NAME,
+    CREATION_DATE_ACTION,
+    START_DATE_ACTION,
+    RESOLUTION_DATE_ACTION,
+    "Max Response Time (Minutes) - SLA",
+    "TIME_USED_TO_COMPLETE_ACTION (minutes)",
+    If("Delay_in_Action (minutes)" <0 , 
+    fAbs("Delay_in_Action (minutes)") , NULL() )  
+    as "Delay action (minutes)"
+    
+FROM [lib://DataFiles/action.csv]
+(txt, codepage is 28591, embedded labels, delimiter is ',', msq);
+
+
+
+
+
+Incidents : 
+
+LOAD
+    TICKET_ID,
+    ACTION_ID,
+    CAUSE,
+    STATUS,
+    PRIORITY,
+    E_CODE_APPLI,
+    SLA
+FROM [lib://DataFiles/incident.csv]
+(txt, utf8, embedded labels, delimiter is ',', msq);
+
+
+
+
+Employees :
+LOAD
+    ID as Employee_ID,
+    Name_LastName
+FROM [lib://DataFiles/employees_final.csv]
+(txt, codepage is 28591, embedded labels, delimiter is ',', msq);
+
+Employees_group :
+LOAD
+    Employee_ID,
+    Group_ID
+FROM [lib://DataFiles/employee_group.csv]
+(txt, utf8, embedded labels, delimiter is ',', msq);
+
+
+
+
+
+calendar 
+////////////////////
+
+
+QuartersMap:
+
+MAPPING LOAD 
+
+rowno() as Month,
+
+'Q' & Ceil (rowno()/3) as Quarter
+
+AUTOGENERATE (12);
+
+
+
+Temp:
+
+Load
+
+               min([CREATION_DATE]) as minDate,   //******* Paste your main date field here*****///
+
+               max([CREATION_DATE]) as maxDate    //******* Paste your main date field here*****///
+
+Resident [Tickets];                            //******* Paste your table name here*****///
+
+
+
+Let varMinDate = Num(Peek('minDate', 0, 'Temp'));
+
+Let varMaxDate = Num(Peek('maxDate', 0, 'Temp'));
+
+DROP Table Temp;
+
+TempCalendar:
+
+LOAD
+
+               $(varMinDate) + Iterno()-1 as Num,
+
+               Date($(varMinDate) + IterNo() - 1) as TempDate
+
+               AutoGenerate 1 While $(varMinDate) + IterNo() -1 <= $(varMaxDate);
+
+
+
+MasterCalendar:
+
+
+Load
+
+*,
+ If( DayNumberOfYear(CREATION_DATE) <= DayNumberOfYear(Today()), 1, 0 ) as IsInYTD
+ ;
+ 
+Load
+
+               TempDate AS CREATION_DATE,               //*** Main date key Name *****//
+
+               week(TempDate) As Week,
+
+               Year(TempDate) As Year,
+
+               Month(TempDate) As Month,
+
+               Day(TempDate) As Day,
+
+               YeartoDate(TempDate)*-1 as CurYTDFlag,
+
+               YeartoDate(TempDate,-1)*-1 as LastYTDFlag,
+
+               inyear(TempDate, Monthstart($(varMaxDate)),-1) as RC12,
+
+               date(monthstart(TempDate), 'MMM-YYYY') as MonthYear,
+
+               ApplyMap('QuartersMap', month(TempDate), Null()) as Quarter,
+
+               Week(weekstart(TempDate)) & '-' & WeekYear(TempDate) as WeekYear,
+
+               WeekDay(TempDate) as WeekDay
+                
+
+Resident TempCalendar
+
+Order By TempDate ASC;
+
+Drop Table TempCalendar;
+
