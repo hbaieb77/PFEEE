@@ -5,7 +5,7 @@ __pycache__/
 
 # Ignore CSV files
 *.csv
-
+*.rar
 # Ignore Excel files
 *.xls
 *.xlsx
