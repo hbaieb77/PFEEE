@@ -2,10 +2,9 @@ Tickets :
 LOAD
     TICKET_ID,
     TICKET_TYPE,
-    Date(Floor(CREATION_DATE)) as CREATION_DATE,
-    Date(Floor(END_DATE)) as END_DATE,
-    //DESC_COURTE,
-    MAX_RESOLUTION_DATE,
+    Date(Floor(CREATION_DATE) ,'DD/MM/YYYY' ) as CREATION_DATE,
+    Date(Floor(END_DATE),'DD/MM/YYYY') as END_DATE,
+    Date(Floor(MAX_RESOLUTION_DATE) ,'DD/MM/YYYY' ) as MAX_RESOLUTION_DATE,
     DUREE_PEC, 
     BENEF_ID,
     INTERV_NAME,
@@ -37,9 +36,10 @@ Actions :
 LOAD
     ACTION_ID,
     ACTION_NAME,
-    CREATION_DATE_ACTION,
-    START_DATE_ACTION,
-    RESOLUTION_DATE_ACTION,
+    Date(Floor(CREATION_DATE_ACTION) ,'DD/MM/YYYY' ) as CREATION_DATE_ACTION,
+    Date(Floor(START_DATE_ACTION) ,'DD/MM/YYYY' ) as START_DATE_ACTION,
+    Date(Floor(RESOLUTION_DATE_ACTION) ,'DD/MM/YYYY' ) as RESOLUTION_DATE_ACTION,
+
     "Max Response Time (Minutes) - SLA",
     "TIME_USED_TO_COMPLETE_ACTION (minutes)",
     If("Delay_in_Action (minutes)" <0 , 
@@ -48,8 +48,6 @@ LOAD
     
 FROM [lib://DataFiles/action.csv]
 (txt, codepage is 28591, embedded labels, delimiter is ',', msq);
-
-
 
 
 
@@ -63,7 +61,7 @@ LOAD
     PRIORITY,
     E_CODE_APPLI,
     SLA
-FROM [lib://DataFiles/incident.csv]
+FROM [lib://DataFiles/incident2.csv]
 (txt, utf8, embedded labels, delimiter is ',', msq);
 
 
